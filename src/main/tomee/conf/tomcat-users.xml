@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<tomcat-users>
+
+  <user username="norman" password="pass" roles="mans-best-friend, peanuts"/>
+
+  <user username="norm" password="pass" roles="peanuts"/>
+
+</tomcat-users>
+
