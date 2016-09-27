@@ -12,34 +12,43 @@ package com.tomitribe.firedrill;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 
 public class Bucket<T, R> {
 
     private final BucketId id;
-    private final Pattern pattern;
+    private final Condition condition;
     private final List<Function<T, R>> functions = new CopyOnWriteArrayList<>();
 
-    public Bucket(final Pattern pattern) {
+    private Bucket(Bucket<T, R> bucket, Condition condition) {
+        this.condition = condition;
+        this.id = bucket.id;
+        this.functions.addAll(bucket.functions);
+    }
+
+    public Bucket(Condition condition) {
+        this.condition = condition;
         this.id = BucketId.generate();
-        this.pattern = pattern;
+    }
+
+    public Condition getCondition() {
+        return condition;
     }
 
     public BucketId getId() {
         return id;
     }
 
-    public Pattern getPattern() {
-        return pattern;
-    }
-
     public List<Function<T, R>> getFunctions() {
         return functions;
     }
 
-    public Bucket copy(final Pattern pattern) {
-        final Bucket<T, R> bucket = new Bucket<T, R>(pattern);
+    public Bucket copy(Condition condition) {
+        final Bucket<T, R> bucket = new Bucket<T, R>(condition);
         bucket.functions.addAll(this.functions);
         return bucket;
+    }
+
+    public Bucket update(Condition condition) {
+        return new Bucket(this, this.condition.merge(condition));
     }
 }

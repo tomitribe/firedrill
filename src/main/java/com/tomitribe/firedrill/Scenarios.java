@@ -39,23 +39,52 @@ public class Scenarios implements CommandListener {
         };
     }
 
-    private static void print(final PrintStream stream, final Bucket bucket) {
-        final BucketId id = bucket.getId();
-        stream.printf("%20s %40s%n", id, bucket);
+    @Command
+    public StreamingOutput detail(BucketId bucketId) {
+        return outputStream -> {
+            final PrintStream out = new PrintStream(outputStream);
+
+            final Bucket bucket = buckets.get(bucketId);
+            if (bucket == null) {
+                out.println("No such scenario " + bucketId);
+                return;
+            }
+
+            printScenarioDetails(out, bucket);
+        };
     }
 
     @Command
-    public String add(Pattern pattern) {
-        final Bucket<Response, Response> bucket = new Bucket<Response, Response>(pattern);
+    public StreamingOutput add(Condition condition) {
+        final Bucket<Response, Response> bucket = new Bucket<>(condition);
         buckets.put(bucket.getId(), bucket);
-        return print(bucket);
+        return outputStream -> {
+            printScenarioDetails(new PrintStream(outputStream), bucket);
+        };
     }
 
     @Command
-    public String copy(BucketId bucketId, Pattern pattern) {
+    public String update(BucketId bucketId, Condition condition) {
+        final Bucket bucket = buckets.get(bucketId);
+
+        if (bucket == null) {
+            return "No such scenario " + bucketId;
+        }
+
+        final Bucket updated = bucket.update(condition);
+        buckets.put(updated.getId(), updated);
+
+        final PrintString out = new PrintString();
+        printScenarioDetails(out, updated);
+
+        return out.toString();
+    }
+
+    @Command
+    public String copy(BucketId bucketId, Condition pattern) {
         final Bucket bucket = buckets.get(bucketId);
         if (bucket == null) {
-            return "No such bucket " + bucketId;
+            return "No such scenario " + bucketId;
         }
         final Bucket copy = bucket.copy(pattern);
         buckets.put(copy.getId(), copy);
@@ -66,7 +95,7 @@ public class Scenarios implements CommandListener {
     public String remove(BucketId bucketId) {
         final Bucket bucket = buckets.remove(bucketId);
         if (bucket == null) {
-            return "No such bucket " + bucketId;
+            return "No such scenario " + bucketId;
         }
         return print(bucket);
     }
@@ -75,5 +104,20 @@ public class Scenarios implements CommandListener {
         final PrintString stream = new PrintString();
         print(stream, bucket);
         return stream.toString();
+    }
+
+    private static void printScenarioDetails(PrintStream out, Bucket bucket) {
+        out.println("Scenario " + bucket.getId());
+        out.println();
+
+        final Condition condition = bucket.getCondition();
+        for (final Map.Entry<String, Pattern> entry : condition.getPatterns().entrySet()) {
+            out.printf("%20s = %s\n", entry.getKey(), entry.getValue());
+        }
+    }
+
+    private static void print(final PrintStream stream, final Bucket bucket) {
+        final BucketId id = bucket.getId();
+        stream.printf("%20s %40s%n", id, bucket);
     }
 }
