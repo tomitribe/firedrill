@@ -150,6 +150,7 @@
         <configuration>
           <excludes>
             <exclude>src/main/tomee/conf/tomcat-users.xml</exclude>
+            <exclude>src/main/resources/META-INF/beans.xml</exclude>
           </excludes>
         </configuration>
       </plugin>

@@ -28,7 +28,6 @@ import java.util.regex.Pattern;
 @Command("scenario")
 public class ResponseCommands implements CommandListener {
 
-
     @Inject
     private ResponseScenarios scenarios;
 
@@ -37,7 +36,7 @@ public class ResponseCommands implements CommandListener {
 
         return outputStream -> {
             final PrintStream stream = new PrintStream(outputStream);
-            for (final Scenario scenario : scenarios.list()) {
+            for (final Scenario scenario : scenarios.getScenarios().list()) {
                 print(stream, scenario);
             }
         };
@@ -49,7 +48,7 @@ public class ResponseCommands implements CommandListener {
             final PrintStream out = new PrintStream(outputStream);
 
             try {
-                final Scenario scenario = scenarios.get(scenarioId);
+                final Scenario scenario = scenarios.getScenarios().get(scenarioId);
                 printScenarioDetails(out, scenario);
             } catch (NoSuchElementException e) {
                 out.println("No such scenario " + scenarioId);
@@ -60,7 +59,7 @@ public class ResponseCommands implements CommandListener {
     @Command
     public StreamingOutput add(Condition condition) {
         return outputStream -> {
-            final Scenario scenario = scenarios.add(condition);
+            final Scenario scenario = scenarios.getScenarios().add(condition);
             printScenarioDetails(new PrintStream(outputStream), scenario);
         };
     }
@@ -68,7 +67,7 @@ public class ResponseCommands implements CommandListener {
     @Command
     public String update(ScenarioId scenarioId, Condition condition) {
         try {
-            final Scenario updated = scenarios.update(scenarioId, condition);
+            final Scenario updated = scenarios.getScenarios().update(scenarioId, condition);
 
             final PrintString out = new PrintString();
             printScenarioDetails(out, updated);
@@ -81,7 +80,7 @@ public class ResponseCommands implements CommandListener {
     @Command
     public String copy(ScenarioId scenarioId, Condition pattern) {
         try {
-            final Scenario updated = scenarios.copy(scenarioId, pattern);
+            final Scenario updated = scenarios.getScenarios().copy(scenarioId, pattern);
 
             final PrintString out = new PrintString();
             printScenarioDetails(out, updated);
@@ -94,7 +93,7 @@ public class ResponseCommands implements CommandListener {
     @Command
     public String remove(ScenarioId scenarioId) {
         try {
-            return print(scenarios.remove(scenarioId));
+            return print(scenarios.getScenarios().remove(scenarioId));
         } catch (NoSuchElementException e) {
             return "No such scenario " + scenarioId;
         }
@@ -118,6 +117,10 @@ public class ResponseCommands implements CommandListener {
 
     private static void print(final PrintStream stream, final Scenario scenario) {
         final ScenarioId id = scenario.getId();
-        stream.printf("%20s %40s%n", id, scenario);
+        stream.printf("%20s ", id);
+        for (final Map.Entry<String, Pattern> entry : scenario.getCondition().getPatterns().entrySet()) {
+            stream.printf("%s=%s  ", entry.getKey(), entry.getValue());
+        }
+        stream.println();
     }
 }

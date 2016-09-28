@@ -14,11 +14,6 @@ import com.tomitribe.firedrill.Scenarios;
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.core.Response;
 
-/**
- * CDI Beans can't have generics, hence this awful wrapper class
- *
- * It's really ugly....  Did I mention I don't like it?
- */
 @ApplicationScoped
 public class ResponseScenarios {
 

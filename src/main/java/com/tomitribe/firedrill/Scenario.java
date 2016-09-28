@@ -93,7 +93,7 @@ public class Scenario<T, R> implements Comparable<Scenario<T, R>> {
     }
 
     public Scenario<T, R> copy(Condition condition) {
-        final Scenario<T, R> scenario = new Scenario<T, R>(condition);
+        final Scenario<T, R> scenario = new Scenario<T, R>(this.condition.merge(condition));
         scenario.functions.addAll(this.functions);
         return scenario;
     }
