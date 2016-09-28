@@ -7,7 +7,7 @@
  * of its trade secrets, irrespective of what has been deposited with the
  * U.S. Copyright Office.
  */
-package com.tomitribe.firedrill;
+package com.tomitribe.firedrill.util;
 
 import java.util.ArrayList;
 import java.util.List;

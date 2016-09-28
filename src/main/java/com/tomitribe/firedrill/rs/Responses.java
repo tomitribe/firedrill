@@ -7,8 +7,9 @@
  * of its trade secrets, irrespective of what has been deposited with the
  * U.S. Copyright Office.
  */
-package com.tomitribe.firedrill;
+package com.tomitribe.firedrill.rs;
 
+import com.tomitribe.firedrill.util.Chance;
 import org.tomitribe.util.Duration;
 import org.tomitribe.util.Size;
 

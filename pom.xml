@@ -48,6 +48,11 @@
     </dependency>
     <dependency>
       <groupId>org.tomitribe</groupId>
+      <artifactId>microscoped-core</artifactId>
+      <version>0.3</version>
+    </dependency>
+    <dependency>
+      <groupId>org.tomitribe</groupId>
       <artifactId>sheldon-api</artifactId>
       <version>${version.sheldon}</version>
       <scope>provided</scope>

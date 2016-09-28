@@ -9,115 +9,55 @@
  */
 package com.tomitribe.firedrill;
 
-import org.tomitribe.crest.api.Command;
-import org.tomitribe.crest.api.StreamingOutput;
-import org.tomitribe.sheldon.api.CommandListener;
-import org.tomitribe.util.PrintString;
-
-import javax.ejb.MessageDriven;
-import javax.ws.rs.core.Response;
-import java.io.PrintStream;
+import java.util.Collection;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
 
-@MessageDriven
-@Command("scenario")
-public class Scenarios implements CommandListener {
 
-    final Map<BucketId, Bucket> buckets = new ConcurrentHashMap<>();
+public class Scenarios<T> {
 
-    // list, copy, modify, add, remove
+    final Map<ScenarioId, Scenario<T, T>> buckets = new ConcurrentHashMap<>();
 
-    @Command
-    public StreamingOutput list() {
-        return outputStream -> {
-            final PrintStream stream = new PrintStream(outputStream);
-            for (final Bucket bucket : buckets.values()) {
-                print(stream, bucket);
-            }
-        };
+    public Collection<Scenario<T, T>> list() {
+        return buckets.values();
     }
 
-    @Command
-    public StreamingOutput detail(BucketId bucketId) {
-        return outputStream -> {
-            final PrintStream out = new PrintStream(outputStream);
+    public Scenario<T, T> get(final ScenarioId scenarioId) throws NoSuchElementException {
 
-            final Bucket bucket = buckets.get(bucketId);
-            if (bucket == null) {
-                out.println("No such scenario " + bucketId);
-                return;
-            }
-
-            printScenarioDetails(out, bucket);
-        };
-    }
-
-    @Command
-    public StreamingOutput add(Condition condition) {
-        final Bucket<Response, Response> bucket = new Bucket<>(condition);
-        buckets.put(bucket.getId(), bucket);
-        return outputStream -> {
-            printScenarioDetails(new PrintStream(outputStream), bucket);
-        };
-    }
-
-    @Command
-    public String update(BucketId bucketId, Condition condition) {
-        final Bucket bucket = buckets.get(bucketId);
-
-        if (bucket == null) {
-            return "No such scenario " + bucketId;
+        final Scenario<T, T> scenario = buckets.get(scenarioId);
+        if (scenario == null) {
+            throw new NoSuchElementException(scenarioId.get());
         }
 
-        final Bucket updated = bucket.update(condition);
+        return scenario;
+    }
+
+    public Scenario<T, T> add(final Condition condition) {
+        final Scenario<T, T> scenario = new Scenario<>(condition);
+        buckets.put(scenario.getId(), scenario);
+        return scenario;
+    }
+
+    public Scenario<T, T> update(ScenarioId scenarioId, Condition condition) throws NoSuchElementException {
+        final Scenario<T, T> scenario = get(scenarioId);
+        final Scenario<T, T> updated = scenario.update(condition);
         buckets.put(updated.getId(), updated);
-
-        final PrintString out = new PrintString();
-        printScenarioDetails(out, updated);
-
-        return out.toString();
+        return updated;
     }
 
-    @Command
-    public String copy(BucketId bucketId, Condition pattern) {
-        final Bucket bucket = buckets.get(bucketId);
-        if (bucket == null) {
-            return "No such scenario " + bucketId;
-        }
-        final Bucket copy = bucket.copy(pattern);
+    public Scenario<T, T> copy(ScenarioId scenarioId, Condition pattern) throws NoSuchElementException {
+        final Scenario<T, T> scenario = get(scenarioId);
+        final Scenario<T, T> copy = scenario.copy(pattern);
         buckets.put(copy.getId(), copy);
-        return print(copy);
+        return copy;
     }
 
-    @Command
-    public String remove(BucketId bucketId) {
-        final Bucket bucket = buckets.remove(bucketId);
-        if (bucket == null) {
-            return "No such scenario " + bucketId;
+    public Scenario<T, T> remove(ScenarioId scenarioId) throws NoSuchElementException {
+        final Scenario<T, T> scenario = buckets.remove(scenarioId);
+        if (scenario == null) {
+            throw new NoSuchElementException(scenarioId.get());
         }
-        return print(bucket);
-    }
-
-    private static String print(Bucket<Response, Response> bucket) {
-        final PrintString stream = new PrintString();
-        print(stream, bucket);
-        return stream.toString();
-    }
-
-    private static void printScenarioDetails(PrintStream out, Bucket bucket) {
-        out.println("Scenario " + bucket.getId());
-        out.println();
-
-        final Condition condition = bucket.getCondition();
-        for (final Map.Entry<String, Pattern> entry : condition.getPatterns().entrySet()) {
-            out.printf("%20s = %s\n", entry.getKey(), entry.getValue());
-        }
-    }
-
-    private static void print(final PrintStream stream, final Bucket bucket) {
-        final BucketId id = bucket.getId();
-        stream.printf("%20s %40s%n", id, bucket);
+        return scenario;
     }
 }

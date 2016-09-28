@@ -7,7 +7,7 @@
  * of its trade secrets, irrespective of what has been deposited with the
  * U.S. Copyright Office.
  */
-package com.tomitribe.firedrill;
+package com.tomitribe.firedrill.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,6 +36,8 @@ public class WeightedRandomResult<T> implements Supplier<T> {
     }
 
     public T get() {
+        final Random random = new Random();
+
         final int i = random.nextInt(statusCodes.size());
         return statusCodes.get(i);
     }

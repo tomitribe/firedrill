@@ -9,6 +9,8 @@
  */
 package com.tomitribe.firedrill;
 
+import com.tomitribe.firedrill.util.WeightedRandomResult;
+
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;

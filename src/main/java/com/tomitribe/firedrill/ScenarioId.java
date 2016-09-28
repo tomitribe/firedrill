@@ -20,17 +20,17 @@ import java.io.IOException;
 import java.util.Random;
 import java.util.regex.Pattern;
 
-public class BucketId {
+public class ScenarioId {
 
     private static final String prefix = "sc-";
     private static final Pattern format = Pattern.compile(prefix + "[a-z0-9]{13}");
     private final String id;
 
-    private BucketId(String id) {
+    private ScenarioId(String id) {
         this.id = id;
     }
 
-    public static BucketId generate() {
+    public static ScenarioId generate() {
 
         final byte[] bytes;
 
@@ -50,13 +50,13 @@ public class BucketId {
         }
 
         // Base32 encode it
-        return new BucketId(prefix + Base32.encode(bytes).replaceAll("=", "").toLowerCase());
+        return new ScenarioId(prefix + Base32.encode(bytes).replaceAll("=", "").toLowerCase());
     }
 
-    public static BucketId parse(final String id) {
+    public static ScenarioId parse(final String id) {
         if (id == null) throw new IllegalArgumentException("id cannot be null");
         if (!format.matcher(id).matches()) throw new IllegalArgumentException("Invalid id format. Expecting " + format.pattern());
-        return new BucketId(id);
+        return new ScenarioId(id);
     }
 
     public String get() {
@@ -68,7 +68,7 @@ public class BucketId {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        BucketId that = (BucketId) o;
+        ScenarioId that = (ScenarioId) o;
 
         if (!id.equals(that.id)) return false;
 
