@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
 public class Scenario<T, R> implements Comparable<Scenario<T, R>> {
@@ -55,7 +56,7 @@ public class Scenario<T, R> implements Comparable<Scenario<T, R>> {
      * insert 3 identical functions that set the response code to 200
      * and insert 1 function that sets the response code to 500
      */
-    private final List<Function<T, R>> functions = new ArrayList<>();
+    private final List<Function<T, R>> functions = new CopyOnWriteArrayList<>();
 
     /**
      * A random number to aid in selection of the next function
@@ -89,7 +90,7 @@ public class Scenario<T, R> implements Comparable<Scenario<T, R>> {
     }
 
     public List<Function<T, R>> getFunctions() {
-        return Collections.unmodifiableList(functions);
+        return functions;
     }
 
     public Scenario<T, R> copy(Condition condition) {

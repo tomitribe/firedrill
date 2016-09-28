@@ -13,15 +13,19 @@ import com.tomitribe.firedrill.Condition;
 import com.tomitribe.firedrill.Scenario;
 import com.tomitribe.firedrill.ScenarioId;
 import org.tomitribe.crest.api.Command;
+import org.tomitribe.crest.api.Default;
+import org.tomitribe.crest.api.Option;
 import org.tomitribe.crest.api.StreamingOutput;
 import org.tomitribe.sheldon.api.CommandListener;
 import org.tomitribe.util.PrintString;
 
 import javax.ejb.MessageDriven;
 import javax.inject.Inject;
+import javax.ws.rs.core.Response;
 import java.io.PrintStream;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 @MessageDriven
@@ -94,6 +98,25 @@ public class ResponseCommands implements CommandListener {
     public String remove(ScenarioId scenarioId) {
         try {
             return print(scenarios.getScenarios().remove(scenarioId));
+        } catch (NoSuchElementException e) {
+            return "No such scenario " + scenarioId;
+        }
+    }
+
+    @Command
+    public String response(ScenarioId scenarioId,
+                           @Option("count") @Default("1") int count,
+                           Responses.Time time, Responses.ResponseCode code, Responses.Bytes bytes) {
+
+        try {
+            final Scenario<Response.ResponseBuilder, Response.ResponseBuilder> scenario = scenarios.getScenarios().get(scenarioId);
+
+            final Function<Response.ResponseBuilder, Response.ResponseBuilder> function = time.andThen(bytes).andThen(code);
+
+            for (int i = 0; i < count; i++) {
+                scenario.getFunctions().add(function);
+            }
+            return print(scenario);
         } catch (NoSuchElementException e) {
             return "No such scenario " + scenarioId;
         }

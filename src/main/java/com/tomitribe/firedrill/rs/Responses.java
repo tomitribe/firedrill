@@ -10,51 +10,105 @@
 package com.tomitribe.firedrill.rs;
 
 import com.tomitribe.firedrill.util.Chance;
+import org.tomitribe.crest.api.Option;
+import org.tomitribe.crest.api.Options;
 import org.tomitribe.util.Duration;
 import org.tomitribe.util.Size;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
+import java.util.Optional;
+import java.util.function.Function;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static org.tomitribe.util.SizeUnit.BYTES;
 
 public class Responses {
 
-    public static long pause(String min, String max) {
-        return pause(new Duration(min).getTime(MILLISECONDS), new Duration(max).getTime(MILLISECONDS));
-    }
+    @Options
+    public static class ResponseCode implements Function<Response.ResponseBuilder, Response.ResponseBuilder> {
 
-    public static long pause(long min, long max) {
-        return Chance.chance.get().range(min, max);
-    }
+        private final int code;
 
-    public static long bytes(String min, String max) {
-        return pause(new Size(min).getSize(BYTES), new Size(max).getSize(BYTES));
-    }
-
-    public static long bytes(long min, long max) {
-        return Chance.chance.get().range(min, max);
-    }
-
-    public static Response response(Response.Status code, long pause, long bytes) {
-        try {
-            Thread.sleep(pause);
-        } catch (InterruptedException e) {
-            Thread.interrupted();
+        public ResponseCode(@Option("response-code") int code) {
+            this.code = code;
         }
 
-        return Response.status(code).entity(bytes(bytes)).build();
+        @Override
+        public Response.ResponseBuilder apply(Response.ResponseBuilder responseBuilder) {
+            return responseBuilder.status(code);
+        }
     }
 
-    public static StreamingOutput bytes(final long bytes) {
-        return (StreamingOutput) outputStream -> {
-            final byte[] data = new byte[1024];
-            long remaining = bytes;
-            for (; remaining > data.length; remaining -= data.length) {
-                outputStream.write(data);
+    @Options
+    public static class Bytes implements Function<Response.ResponseBuilder, Response.ResponseBuilder> {
+
+        private final Size min;
+        private final Size max;
+
+        public Bytes(@Option("min-bytes") Size min, @Option("max-bytes") Size max) {
+            this.min = Optional.ofNullable(min).orElse(new Size("0 bytes"));
+            this.max = Optional.ofNullable(max).orElse(this.min);
+
+            if (min.getSize(BYTES) < 0) {
+                throw new IllegalStateException(String.format("Min and Max must be zero or more: min='%s' max='%s'", min, max));
             }
-            outputStream.write(new byte[(int) remaining]);
-        };
+
+            if (min.getSize(BYTES) > max.getSize(BYTES)) {
+                throw new IllegalStateException(String.format("Min cannot be greater than Max: min='%s' max='%s'", min, max));
+            }
+        }
+
+        @Override
+        public Response.ResponseBuilder apply(Response.ResponseBuilder responseBuilder) {
+            long bytes = Chance.chance.get().range(min.getSize(BYTES), max.getSize(BYTES));
+            return responseBuilder.entity(bytes(bytes));
+        }
+
+        public static StreamingOutput bytes(final long bytes) {
+            return (StreamingOutput) outputStream -> {
+                final byte[] data = new byte[1024];
+                long remaining = bytes;
+                for (; remaining > data.length; remaining -= data.length) {
+                    outputStream.write(data);
+                }
+                outputStream.write(new byte[(int) remaining]);
+            };
+        }
+    }
+
+    @Options
+    public static class Time implements Function<Response.ResponseBuilder, Response.ResponseBuilder> {
+
+        private final Duration min;
+        private final Duration max;
+
+        public Time(@Option("min-time") Duration min, @Option("max-time") Duration max) {
+            this.min = Optional.ofNullable(min).orElse(new Duration("0"));
+            this.max = Optional.ofNullable(max).orElse(this.min);
+
+            if (min.getTime(NANOSECONDS) < 0) {
+                throw new IllegalStateException(String.format("Min and Max must be zero or more: min='%s' max='%s'", min, max));
+            }
+
+            if (min.getTime(NANOSECONDS) > max.getTime(NANOSECONDS)) {
+                throw new IllegalStateException(String.format("Min cannot be greater than Max: min='%s' max='%s'", min, max));
+            }
+        }
+
+        @Override
+        public Response.ResponseBuilder apply(Response.ResponseBuilder responseBuilder) {
+
+            final long wait = Chance.chance.get().range(min.getTime(MILLISECONDS), max.getTime(MILLISECONDS));
+
+            try {
+                Thread.sleep(wait);
+            } catch (InterruptedException e) {
+                Thread.interrupted();
+            }
+
+            return responseBuilder;
+        }
     }
 }
