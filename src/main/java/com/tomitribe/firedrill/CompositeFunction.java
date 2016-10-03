@@ -17,11 +17,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-@XmlRootElement(name = "function")
+@XmlRootElement(name = "composite")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class CompositeFunction<T> implements Function<T, T> {
 
-    @XmlAnyElement
+    @XmlAnyElement(lax = true)
     private final List<Function<T, T>> functions = new ArrayList<>();
 
     public CompositeFunction() {
@@ -41,5 +41,9 @@ public class CompositeFunction<T> implements Function<T, T> {
             t = f.apply(t);
         }
         return t;
+    }
+
+    public List<Function<T, T>> getFunctions() {
+        return functions;
     }
 }

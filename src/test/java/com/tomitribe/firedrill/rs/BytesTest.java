@@ -1,5 +1,7 @@
 package com.tomitribe.firedrill.rs;
 
+import com.tomitribe.firedrill.CompositeFunction;
+import com.tomitribe.firedrill.Outcome;
 import org.junit.Test;
 import org.tomitribe.util.IO;
 import org.tomitribe.util.PrintString;
@@ -41,7 +43,7 @@ public class BytesTest {
                             "<document>\n" +
                             "    <bytes min=\"10kb\" max=\"20mb\"/>\n" +
                             "    <bytes min=\"10kb\" max=\"20mb\"/>\n" +
-                            "    <responseCode>200</responseCode>\n" +
+                            "    <responseCode code=\"200\"/>\n" +
                             "</document>\n",
                     xmlContent.toString());
         }
@@ -53,7 +55,46 @@ public class BytesTest {
             assertEquals(bytes, (Bytes) object.function.get(0));
         }
 
-        System.out.println(xmlContent);
+    }
+
+    @Test
+    public void testXml2() throws Exception {
+
+        final Bytes bytes = new Bytes(new Size("10k"), new Size("20mb"));
+
+        final PrintString xmlContent = new PrintString();
+        final JAXBContext jaxbContext = JAXBContext.newInstance(
+                Document.class,
+                Bytes.class,
+                CompositeFunction.class,
+                Outcome.class,
+                ResponseCode.class);
+
+        {
+            final Outcome outcome = new Outcome(100, new CompositeFunction<>(bytes));
+            final Marshaller marshaller = jaxbContext.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+//            marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, "");
+            marshaller.marshal(outcome, xmlContent);
+
+            System.out.println(xmlContent);
+            assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
+                            "<outcome weight=\"100\">\n" +
+                            "    <composite>\n" +
+                            "        <bytes min=\"10kb\" max=\"20mb\"/>\n" +
+                            "    </composite>\n" +
+                            "</outcome>\n",
+                    xmlContent.toString());
+        }
+
+        { // from xml
+            final Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+            final Outcome object = (Outcome) unmarshaller.unmarshal(IO.read(xmlContent.toString()));
+            assertEquals(100, object.getWeight());
+            final CompositeFunction function = (CompositeFunction) object.getFunction();
+            assertEquals(bytes, (Bytes) function.getFunctions().get(0));
+        }
+
     }
 
     @XmlRootElement
@@ -66,7 +107,7 @@ public class BytesTest {
         public Document() {
         }
 
-        public Document(Bytes bytes) {
+        public Document(Function<Response.ResponseBuilder, Response.ResponseBuilder> bytes) {
             this.function.add(bytes);
             this.function.add(bytes);
             this.function.add(new ResponseCode(200));

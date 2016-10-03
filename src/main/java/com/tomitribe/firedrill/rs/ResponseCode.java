@@ -15,6 +15,7 @@ import org.tomitribe.crest.api.Options;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlValue;
 import java.util.function.Function;
@@ -24,7 +25,7 @@ import java.util.function.Function;
 @Options
 public class ResponseCode implements Function<Response.ResponseBuilder, Response.ResponseBuilder> {
 
-    @XmlValue
+    @XmlAttribute
     private final int code;
 
     public ResponseCode() {

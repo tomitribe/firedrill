@@ -11,7 +11,6 @@ package com.tomitribe.firedrill;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -21,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
@@ -74,7 +74,7 @@ public class Scenario<T, R> implements Comparable<Scenario<T, R>>, Function<T, R
     private final List<Function<T, R>> functions = new CopyOnWriteArrayList<>();
 
 
-    final Set<Outcome> outcomes = new HashSet<>();
+    final List<Outcome> outcomes = new ArrayList<>();
 
     /**
      * A random number to aid in selection of the next function
@@ -88,6 +88,12 @@ public class Scenario<T, R> implements Comparable<Scenario<T, R>>, Function<T, R
         this.id = scenario.id;
         this.created = scenario.created;
         this.functions.addAll(scenario.functions);
+    }
+
+    private Scenario(ScenarioId id, Condition condition) {
+        this.condition = condition;
+        this.id = Optional.ofNullable(id).orElseGet(ScenarioId::generate);
+        this.created = System.currentTimeMillis();
     }
 
     public Scenario(Condition condition) {
@@ -140,32 +146,42 @@ public class Scenario<T, R> implements Comparable<Scenario<T, R>>, Function<T, R
         }
     }
 
-    @XmlAccessorType(XmlAccessType.FIELD)
-    public static class Outcome<T, R> {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-        @XmlAttribute
-        private final int weight;
+        Scenario<?, ?> scenario = (Scenario<?, ?>) o;
 
-        @XmlAnyElement
-        private final Function<T, R> function;
+        if (!id.equals(scenario.id)) return false;
 
-        public Outcome() {
-            weight = 0;
-            function = null;
-        }
+        return true;
+    }
 
-        public Outcome(int weight, Function<T, R> function) {
-            this.weight = weight;
-            this.function = function;
-        }
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "Scenario{" +
+                "id=" + id +
+                '}';
     }
 
     @XmlRootElement(name = "scenario")
     @XmlAccessorType(XmlAccessType.FIELD)
     public static class Adapter extends XmlAdapter<Scenario.Adapter, Scenario> {
 
-        final List<When> when = new ArrayList<>();
-        final List<Outcome> outcome = new ArrayList<>();
+        @XmlAttribute
+        private ScenarioId id = ScenarioId.generate();
+
+        private final List<When> when = new ArrayList<>();
+        private final List<Outcome> outcome = new ArrayList<>();
+
+        public Adapter() {
+        }
 
         @Override
         public Scenario unmarshal(Adapter v) throws Exception {
@@ -175,10 +191,10 @@ public class Scenario<T, R> implements Comparable<Scenario<T, R>>, Function<T, R
                 map.put(w.key, Pattern.compile(w.matches));
             }
 
-            final Scenario<Object, Object> scenario = new Scenario<>(Condition.from(map));
+            final Scenario<Object, Object> scenario = new Scenario<>(v.id, Condition.from(map));
 
-            for (final Outcome o : outcome) {
-                scenario.add(o.weight, o.function);
+            for (final Outcome o : v.outcome) {
+                scenario.add(o.getWeight(), o.getFunction());
             }
 
             return scenario;
@@ -187,6 +203,7 @@ public class Scenario<T, R> implements Comparable<Scenario<T, R>>, Function<T, R
         @Override
         public Adapter marshal(Scenario v) throws Exception {
             final Adapter adapter = new Adapter();
+            adapter.id = v.getId();
             adapter.outcome.addAll(v.outcomes);
 
             for (final Map.Entry<String, Pattern> entry : v.getCondition().getPatterns().entrySet()) {

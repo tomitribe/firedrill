@@ -14,7 +14,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @XmlSeeAlso(CompositeFunction.class)
 public class Scenarios<T> {
 
-    @XmlJavaTypeAdapter(ScenariosAdapter.class)
+//    @XmlJavaTypeAdapter(Xml.class)
     final Map<ScenarioId, Scenario<T, T>> scenarios = new ConcurrentHashMap<>();
 
     public Scenarios() {
@@ -42,7 +41,7 @@ public class Scenarios<T> {
 
     public Scenario<T, T> get(final ScenarioId scenarioId) throws NoSuchElementException {
 
-        final Scenario<T, T> scenario = scenarios.get(scenarioId);
+        final Scenario<T, T> scenario = this.scenarios.get(scenarioId);
         if (scenario == null) {
             throw new NoSuchElementException(scenarioId.get());
         }
@@ -52,26 +51,26 @@ public class Scenarios<T> {
 
     public Scenario<T, T> add(final Condition condition) {
         final Scenario<T, T> scenario = new Scenario<>(condition);
-        scenarios.put(scenario.getId(), scenario);
+        this.scenarios.put(scenario.getId(), scenario);
         return scenario;
     }
 
     public Scenario<T, T> update(ScenarioId scenarioId, Condition condition) throws NoSuchElementException {
         final Scenario<T, T> scenario = get(scenarioId);
         final Scenario<T, T> updated = scenario.update(condition);
-        scenarios.put(updated.getId(), updated);
+        this.scenarios.put(updated.getId(), updated);
         return updated;
     }
 
     public Scenario<T, T> copy(ScenarioId scenarioId, Condition pattern) throws NoSuchElementException {
         final Scenario<T, T> scenario = get(scenarioId);
         final Scenario<T, T> copy = scenario.copy(pattern);
-        scenarios.put(copy.getId(), copy);
+        this.scenarios.put(copy.getId(), copy);
         return copy;
     }
 
     public Scenario<T, T> remove(ScenarioId scenarioId) throws NoSuchElementException {
-        final Scenario<T, T> scenario = scenarios.remove(scenarioId);
+        final Scenario<T, T> scenario = this.scenarios.remove(scenarioId);
         if (scenario == null) {
             throw new NoSuchElementException(scenarioId.get());
         }
@@ -80,25 +79,50 @@ public class Scenarios<T> {
 
     @XmlRootElement(name = "scenarios")
     @XmlAccessorType(XmlAccessType.FIELD)
-    public static class ScenariosAdapter extends XmlAdapter<ScenariosAdapter, Map<ScenarioId, Scenario>> {
+    public static class Xml extends XmlAdapter<Xml, Scenarios> {
 
         final List<Scenario> scenario = new ArrayList<>();
 
-        @Override
-        public Map<ScenarioId, Scenario> unmarshal(ScenariosAdapter v) throws Exception {
-            final ConcurrentHashMap<ScenarioId, Scenario> map = new ConcurrentHashMap<>();
-            for (final Scenario s : v.scenario) {
-                map.put(s.getId(), s);
-            }
-            return map;
+        public Xml() {
+        }
+
+        public Xml(Scenarios scenarios) {
         }
 
         @Override
-        public ScenariosAdapter marshal(Map<ScenarioId, Scenario> v) throws Exception {
-            final ScenariosAdapter scenariosAdapter = new ScenariosAdapter();
-            scenariosAdapter.scenario.addAll(v.values());
-            Collections.sort(scenariosAdapter.scenario);
-            return scenariosAdapter;
+        public Scenarios unmarshal(Xml v) throws Exception {
+            final Scenarios scenarios = new Scenarios();
+            for (final Scenario s : v.scenario) {
+                scenarios.scenarios.put(s.getId(), s);
+            }
+            return scenarios;
         }
+
+        @Override
+        public Xml marshal(Scenarios v) throws Exception {
+            return from(v);
+        }
+
+        public static Xml from(Scenarios v) {
+            final Xml xml = new Xml();
+            xml.scenario.addAll(v.scenarios.values());
+            Collections.sort(xml.scenario);
+            return xml;
+        }
+
+        public Scenarios getScenarios() {
+            final Scenarios<Object> scenarios = new Scenarios<>();
+            for (final Scenario s : scenario) {
+                scenarios.scenarios.put(s.getId(), s);
+            }
+            return scenarios;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "Scenarios{" +
+                "scenarios=" + scenarios.size() +
+                '}';
     }
 }
