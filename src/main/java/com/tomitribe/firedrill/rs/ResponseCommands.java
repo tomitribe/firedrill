@@ -106,16 +106,21 @@ public class ResponseCommands implements CommandListener {
     @Command
     public String response(ScenarioId scenarioId,
                            @Option("count") @Default("1") int count,
-                           Responses.Time time, Responses.ResponseCode code, Responses.Bytes bytes) {
+                           Time time,
+                           ResponseCode code,
+                           Bytes bytes) {
 
         try {
             final Scenario<Response.ResponseBuilder, Response.ResponseBuilder> scenario = scenarios.getScenarios().get(scenarioId);
 
-            final Function<Response.ResponseBuilder, Response.ResponseBuilder> function = time.andThen(bytes).andThen(code);
+            Function<Response.ResponseBuilder, Response.ResponseBuilder> function = Function.identity();
 
-            for (int i = 0; i < count; i++) {
-                scenario.getFunctions().add(function);
-            }
+            if (time != null) function = function.andThen(time);
+            if (bytes != null) function = function.andThen(bytes);
+            if (code != null) function = function.andThen(code);
+
+            scenario.add(count, function);
+
             return print(scenario);
         } catch (NoSuchElementException e) {
             return "No such scenario " + scenarioId;

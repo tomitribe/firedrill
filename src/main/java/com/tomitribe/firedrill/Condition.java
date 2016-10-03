@@ -12,14 +12,24 @@ package com.tomitribe.firedrill;
 import org.tomitribe.crest.api.Option;
 import org.tomitribe.crest.api.Options;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 @Options
+@XmlJavaTypeAdapter(Condition.Adapter.class)
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Condition {
 
     private final Map<String, Pattern> patterns = new TreeMap<>();
@@ -62,6 +72,20 @@ public class Condition {
         return true;
     }
 
+    public static Condition from(Map<String, Pattern> map) {
+        final Condition merged = create();
+        merged.patterns.putAll(map);
+        return merged;
+    }
+
+    /**
+     * Currently Crest does not support a class having two constructors
+     * So a private no-arg constructor is not possible.
+     */
+    private static Condition create() {
+        return new Condition(null, null, null, null, null, null, null, null, null, null, null);
+    }
+
     public Map<String, Pattern> getPatterns() {
         return Collections.unmodifiableMap(patterns);
     }
@@ -85,8 +109,53 @@ public class Condition {
         }
 
         // Crest can't handle a no-arg constructor mixed in with the @Option annotated constructor
-        final Condition merged = new Condition(null, null, null, null, null, null, null, null, null, null, null);
+        final Condition merged = create();
         merged.patterns.putAll(map);
         return merged;
+    }
+
+    @XmlAccessorType(XmlAccessType.FIELD)
+    public static class Adapter extends XmlAdapter<Adapter, Condition> {
+
+        final List<When> when = new ArrayList<>();
+
+        @Override
+        public Condition unmarshal(Adapter v) throws Exception {
+            final Condition condition = create();
+
+            for (final When w : v.when) {
+                condition.patterns.put(w.key, Pattern.compile(w.matches));
+            }
+
+            return condition;
+        }
+
+        @Override
+        public Adapter marshal(Condition v) throws Exception {
+            final Adapter adapter = new Adapter();
+            for (final Map.Entry<String, Pattern> entry : v.patterns.entrySet()) {
+                adapter.when.add(new When(entry.getKey(), entry.getValue()));
+            }
+            return adapter;
+        }
+    }
+
+    @XmlRootElement
+    @XmlAccessorType
+    public static class When {
+
+        @XmlAttribute
+        private String key;
+
+        @XmlAttribute
+        private String matches;
+
+        public When() {
+        }
+
+        public When(String key, Pattern matches) {
+            this.key = key;
+            this.matches = matches.pattern();
+        }
     }
 }

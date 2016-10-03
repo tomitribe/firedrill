@@ -34,7 +34,6 @@ public class ScenarioExecutor<T> implements Function<T, T> {
 
         final List<Scenario<T, T>> matchingScenarios = scenarios.list().stream()
                 .filter(scenario -> scenario.getCondition().matches(context))
-                .sorted()
                 .collect(Collectors.toList());
 
         for (final Scenario<T, T> scenario : matchingScenarios) {
@@ -44,7 +43,7 @@ public class ScenarioExecutor<T> implements Function<T, T> {
 
             try {
                 // Execute the Scenario's randomly chosen function
-                t = scenario.select().apply(t);
+                t = scenario.apply(t);
             } finally {
 
                 // Exit the ScenarioScoped

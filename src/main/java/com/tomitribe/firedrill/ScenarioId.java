@@ -15,11 +15,14 @@ import org.tomitribe.util.hash.Slice;
 import org.tomitribe.util.hash.Slices;
 import org.tomitribe.util.hash.XxHash64;
 
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Random;
 import java.util.regex.Pattern;
 
+@XmlJavaTypeAdapter(ScenarioId.Adapter.class)
 public class ScenarioId {
 
     private static final String prefix = "sc-";
@@ -83,5 +86,18 @@ public class ScenarioId {
     @Override
     public String toString() {
         return id;
+    }
+
+    public static class Adapter extends XmlAdapter<String, ScenarioId> {
+
+        @Override
+        public ScenarioId unmarshal(String v) throws Exception {
+            return new ScenarioId(v);
+        }
+
+        @Override
+        public String marshal(ScenarioId v) throws Exception {
+            return v.toString();
+        }
     }
 }
