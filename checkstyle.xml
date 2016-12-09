@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.2//EN"
+        "http://www.puppycrawl.com/dtds/configuration_1_2.dtd">
+<module name="Checker"><module name="SuppressionCommentFilter"/>
+<module name="FileLength"><property name="max" value="3500"/>
+<property name="fileExtensions" value="java"/>
+</module>
+<module name="FileTabCharacter"/>
+<module name="SuppressionCommentFilter"/>
+<module name="TreeWalker"><module name="FileContentsHolder"/>
+<module name="ConstantName"><property name="format" value="^(_?[a-z][a-zA-Z0-9]*|([A-Z](_?[A-Z0-9]+)*))$"/>
+</module>
+<module name="LocalVariableName"/>
+<module name="MethodName"><property name="format" value="^_?[a-z][a-zA-Z0-9]*$"/>
+</module>
+<module name="PackageName"/>
+<module name="LocalFinalVariableName"/>
+<module name="ParameterName"/>
+<module name="StaticVariableName"/>
+<module name="TypeName"><property name="format" value="^_?[A-Z][a-zA-Z0-9]*$"/>
+</module>
+<module name="AvoidStarImport"><property name="excludes" value="java.io,java.net,java.util,javax.enterprise.inject.spi,javax.enterprise.context"/>
+</module>
+<module name="IllegalImport"><property name="illegalPkgs" value=" sun.management, sun.usagetracker, sun.reflect, sun.launcher, sun.jar, sun.print, sun.java2d, sun.font,                   sun.rmi,                   sun.util,                   sun.instrument,                   sun.applet,                   sun.swing,                   sun.invoke,                   sun.audio,                   sun.net,                   sun.dc,                   sun.corba,                   sun.tracing,                   sun.security,                   sun.lwawt,                   sun.awt,                   "/>
+</module>
+<module name="RedundantImport"/>
+<module name="UnusedImports"/>
+<module name="LineLength"><property name="max" value="180"/>
+<property name="ignorePattern" value="@version|@see"/>
+</module>
+<module name="MethodLength"><property name="max" value="250"/>
+</module>
+<module name="ParameterNumber"><property name="max" value="20"/>
+</module>
+<module name="EmptyBlock"><property name="option" value="text"/>
+</module>
+<module name="NeedBraces"><property name="tokens" value="LITERAL_DO, LITERAL_ELSE, LITERAL_FOR, LITERAL_WHILE"/>
+</module>
+<module name="LeftCurly"><property name="option" value="EOL"/>
+</module>
+<module name="RightCurly"><property name="option" value="SAME"/>
+</module>
+<module name="EmptyStatement"/>
+<module name="EqualsHashCode"/>
+<module name="DefaultComesLast"/>
+<module name="MissingSwitchDefault"/>
+<module name="FallThrough"/>
+<module name="MultipleVariableDeclarations"/>
+<module name="com.puppycrawl.tools.checkstyle.checks.design.DesignForExtensionCheck"><property name="severity" value="ignore"/>
+</module>
+<module name="HideUtilityClassConstructor"/>
+<module name="com.puppycrawl.tools.checkstyle.checks.design.VisibilityModifierCheck"><property name="packageAllowed" value="false"/>
+<property name="protectedAllowed" value="true"/>
+<property name="publicMemberPattern" value="^serialVersionUID"/>
+<property name="severity" value="warning"/>
+</module>
+<module name="UpperEll"/>
+</module>
+</module>
