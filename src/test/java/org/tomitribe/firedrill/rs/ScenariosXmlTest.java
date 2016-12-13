@@ -42,19 +42,19 @@ public class ScenariosXmlTest {
 
         final Scenarios<Response.ResponseBuilder> scenarios = new Scenarios<>();
 
-        final Scenario<Response.ResponseBuilder, Response.ResponseBuilder> scenario = scenarios.add(new Condition(
-                Pattern.compile(".*user.*"),
-                Pattern.compile("method.*"),
-                Pattern.compile(".*Path"),
-                Pattern.compile("grantType.*"),
-                Pattern.compile("app.*"),
-                Pattern.compile("clientIp.*"),
-                Pattern.compile("client id"),
-                Pattern.compile("server[Ii][pP]"),
-                Pattern.compile("server Name"),
-                Pattern.compile("authTyPe"),
-                Pattern.compile("dataCENter")
-        ));
+        final Scenario<Response.ResponseBuilder, Response.ResponseBuilder> scenario = scenarios.add(Condition.create()
+                        .username(Pattern.compile(".*user.*"))
+                        .httpMethod(Pattern.compile("method.*"))
+                        .path(Pattern.compile(".*Path"))
+                        .grantType(Pattern.compile("grantType.*"))
+                        .applicationName(Pattern.compile("app.*"))
+                        .clientIp(Pattern.compile("clientIp.*"))
+                        .clientId(Pattern.compile("client id"))
+                        .serverIp(Pattern.compile("server[Ii][pP]"))
+                        .serverName(Pattern.compile("server Name"))
+                        .authType(Pattern.compile("authTyPe"))
+                        .datacenter(Pattern.compile("dataCENter"))
+        );
 
         final Bytes bytes = new Bytes(new Size("10kb"), new Size("33mb"));
         final ResponseCode code = new ResponseCode(200);
@@ -85,7 +85,7 @@ public class ScenariosXmlTest {
                     "        <when key=\"clientIp\" matches=\"clientIp.*\"/>\n" +
                     "        <when key=\"datacenter\" matches=\"dataCENter\"/>\n" +
                     "        <when key=\"grantType\" matches=\"grantType.*\"/>\n" +
-                    "        <when key=\"method\" matches=\"method.*\"/>\n" +
+                    "        <when key=\"httpMethod\" matches=\"method.*\"/>\n" +
                     "        <when key=\"path\" matches=\".*Path\"/>\n" +
                     "        <when key=\"serverIp\" matches=\"server[Ii][pP]\"/>\n" +
                     "        <when key=\"serverName\" matches=\"server Name\"/>\n" +

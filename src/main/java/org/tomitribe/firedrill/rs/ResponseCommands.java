@@ -35,7 +35,7 @@ import java.util.NoSuchElementException;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
-@MessageDriven
+//@MessageDriven
 @Command("scenario")
 public class ResponseCommands implements CommandListener {
 

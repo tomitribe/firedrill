@@ -19,6 +19,7 @@ package org.tomitribe.firedrill.rs;
 import javax.enterprise.context.RequestScoped;
 import javax.ws.rs.core.Response;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Simple RequestScoped bean eliminates needing to store the
@@ -29,7 +30,7 @@ import java.util.function.Function;
  * function they should call.
  */
 @RequestScoped
-public class ResponseFunction {
+public class ResponseFunction implements Supplier<Response>{
 
     private Function<Response.ResponseBuilder, Response.ResponseBuilder> function;
 
@@ -39,5 +40,10 @@ public class ResponseFunction {
 
     public Function<Response.ResponseBuilder, Response.ResponseBuilder> getFunction() {
         return function;
+    }
+
+    @Override
+    public Response get() {
+        return getFunction().apply(Response.ok()).build();
     }
 }

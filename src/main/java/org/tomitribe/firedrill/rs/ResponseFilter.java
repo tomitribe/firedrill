@@ -16,7 +16,9 @@
  */
 package org.tomitribe.firedrill.rs;
 
+import org.apache.catalina.connector.Request;
 import org.tomitribe.firedrill.ScenarioExecutor;
+import org.tomitribe.util.collect.ObjectMap;
 
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
@@ -29,10 +31,10 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,24 +56,22 @@ public class ResponseFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        final HttpServletRequest request = (HttpServletRequest) servletRequest;
 
         final Map<String, String> context = new HashMap<>();
 
-        context.put("username", request.getUserPrincipal().getName());
-        context.put("method", request.getMethod());
-        context.put("path", request.getRequestURI());
-        context.put("applicationName", request.getContextPath());
-        context.put("serverName", request.getServerName());
-
-// TODO get these values from somewhere
-//        context.put("grantType", grantType);
-//        context.put("clientIp", clientIp);
-//        context.put("clientId", clientId);
-//        context.put("serverIp", serverIp);
-//        context.put("authType", authType);
-//        context.put("datacenter", datacenter);
-
+        try {
+            Field request = servletRequest.getClass().getDeclaredField("request");
+            request.setAccessible(true);
+            final Object o = request.get(servletRequest);
+            final RequestData requestData = new RequestData((Request) o);
+            final ObjectMap map = new ObjectMap(requestData);
+            for (final Map.Entry<String, Object> entry : map.entrySet()) {
+                final String value = String.valueOf(entry.getValue()).replace("null", "");
+                context.put(entry.getKey(), value);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         // We set ScenarioExecutor as a Function in what is effectively a thread local
         // The code being called may or may not execute it.

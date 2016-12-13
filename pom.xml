@@ -41,8 +41,8 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <version.crest>0.7</version.crest>
-    <version.sheldon>0.8-SNAPSHOT</version.sheldon>
+    <version.crest>0.10-SNAPSHOT</version.crest>
+    <version.sheldon>0.9-SNAPSHOT</version.sheldon>
     <maven.checkstyle.plugin.version>2.16</maven.checkstyle.plugin.version>
   </properties>
 
@@ -114,6 +114,12 @@
       <artifactId>geronimo-json_1.0_spec</artifactId>
       <version>1.0-alpha-1</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.tomcat</groupId>
+      <artifactId>tomcat-catalina</artifactId>
+      <version>7.0.69</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -171,7 +177,7 @@
         <configuration>
           <excludes>
             <exclude>src/main/tomee/conf/tomcat-users.xml</exclude>
-            <exclude>src/main/resources/META-INF/beans.xml</exclude>
+            <exclude>src/main/resources/META-INF/**</exclude>
           </excludes>
         </configuration>
       </plugin>
