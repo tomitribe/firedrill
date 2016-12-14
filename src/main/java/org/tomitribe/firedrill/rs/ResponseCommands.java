@@ -16,13 +16,13 @@
  */
 package org.tomitribe.firedrill.rs;
 
-import org.tomitribe.firedrill.Condition;
-import org.tomitribe.firedrill.Scenario;
-import org.tomitribe.firedrill.ScenarioId;
 import org.tomitribe.crest.api.Command;
 import org.tomitribe.crest.api.Default;
 import org.tomitribe.crest.api.Option;
 import org.tomitribe.crest.api.StreamingOutput;
+import org.tomitribe.firedrill.Condition;
+import org.tomitribe.firedrill.Scenario;
+import org.tomitribe.firedrill.ScenarioId;
 import org.tomitribe.sheldon.api.CommandListener;
 import org.tomitribe.util.Duration;
 import org.tomitribe.util.PrintString;
@@ -169,9 +169,9 @@ public class ResponseCommands implements CommandListener {
 
     @Command("memory-fill")
     public String memoryfill(ScenarioId scenarioId,
-                           @Option("count") @Default("1") int count,
-                           @Option("min-bytes") Size minBytes,
-                           @Default("10mb") @Option("max-bytes") Size maxBytes) {
+                             @Option("count") @Default("1") int count,
+                             @Option("min-bytes") Size minBytes,
+                             @Default("10mb") @Option("max-bytes") Size maxBytes) {
 
         try {
             final Scenario<Response.ResponseBuilder, Response.ResponseBuilder> scenario = scenarios.getScenarios().get(scenarioId);
@@ -216,6 +216,23 @@ public class ResponseCommands implements CommandListener {
             Function<Response.ResponseBuilder, Response.ResponseBuilder> function = Function.identity();
 
             function = function.andThen(new DiskClear());
+            scenario.add(count, function);
+
+            return print(scenario);
+        } catch (NoSuchElementException e) {
+            return "No such scenario " + scenarioId;
+        }
+    }
+
+    @Command("song-find")
+    public String songfind(ScenarioId scenarioId, @Option("count") @Default("1") int count, @Option("min") Integer min, @Option("max") Integer max) {
+
+        try {
+            final Scenario<Response.ResponseBuilder, Response.ResponseBuilder> scenario = scenarios.getScenarios().get(scenarioId);
+
+            Function<Response.ResponseBuilder, Response.ResponseBuilder> function = Function.identity();
+
+            function = function.andThen(new SongFind(min, max));
             scenario.add(count, function);
 
             return print(scenario);
