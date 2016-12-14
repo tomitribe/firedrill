@@ -24,7 +24,9 @@ import org.tomitribe.crest.api.Default;
 import org.tomitribe.crest.api.Option;
 import org.tomitribe.crest.api.StreamingOutput;
 import org.tomitribe.sheldon.api.CommandListener;
+import org.tomitribe.util.Duration;
 import org.tomitribe.util.PrintString;
+import org.tomitribe.util.Size;
 
 import javax.ejb.MessageDriven;
 import javax.inject.Inject;
@@ -35,7 +37,7 @@ import java.util.NoSuchElementException;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
-//@MessageDriven
+@MessageDriven
 @Command("scenario")
 public class ResponseCommands implements CommandListener {
 
@@ -113,18 +115,26 @@ public class ResponseCommands implements CommandListener {
     @Command
     public String response(ScenarioId scenarioId,
                            @Option("count") @Default("1") int count,
-                           Time time,
-                           ResponseCode code,
-                           Bytes bytes) {
+                           @Option("response-code") Integer code,
+                           @Option("min-time") Duration minTime,
+                           @Option("max-time") Duration maxTime,
+                           @Option("min-bytes") Size minBytes,
+                           @Option("max-bytes") Size maxBytes) {
 
         try {
             final Scenario<Response.ResponseBuilder, Response.ResponseBuilder> scenario = scenarios.getScenarios().get(scenarioId);
 
             Function<Response.ResponseBuilder, Response.ResponseBuilder> function = Function.identity();
 
-            if (time != null) function = function.andThen(time);
-            if (bytes != null) function = function.andThen(bytes);
-            if (code != null) function = function.andThen(code);
+            if (minTime != null || maxTime != null) {
+                function = function.andThen(new Time(minTime, maxTime));
+            }
+            if (minBytes != null || maxBytes != null) {
+                function = function.andThen(new Bytes(minBytes, maxBytes));
+            }
+            if (code != null) {
+                function = function.andThen(new ResponseCode(code));
+            }
 
             scenario.add(count, function);
 

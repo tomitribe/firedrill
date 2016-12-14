@@ -41,8 +41,8 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <version.crest>0.10-SNAPSHOT</version.crest>
-    <version.sheldon>0.9-SNAPSHOT</version.sheldon>
+    <version.crest>0.5</version.crest>
+    <version.sheldon>0.9-demo1-SNAPSHOT</version.sheldon>
     <maven.checkstyle.plugin.version>2.16</maven.checkstyle.plugin.version>
   </properties>
 
