@@ -84,6 +84,15 @@ public class Scenarios<T> {
         return scenario;
     }
 
+    public void add(Scenarios<T> scenarios) {
+        this.scenarios.putAll(scenarios.scenarios);
+    }
+
+    public void set(Scenarios<T> scenarios) {
+        this.scenarios.clear();
+        this.scenarios.putAll(scenarios.scenarios);
+    }
+
     @XmlRootElement(name = "scenarios")
     @XmlAccessorType(XmlAccessType.FIELD)
     public static class Xml extends XmlAdapter<Xml, Scenarios> {

@@ -19,17 +19,14 @@ package org.tomitribe.firedrill.rs;
 import org.junit.Test;
 import org.tomitribe.firedrill.CompositeFunction;
 import org.tomitribe.firedrill.Condition;
-import org.tomitribe.firedrill.Outcome;
 import org.tomitribe.firedrill.Scenario;
 import org.tomitribe.firedrill.Scenarios;
-import org.tomitribe.util.IO;
+import org.tomitribe.firedrill.ScenariosXml;
 import org.tomitribe.util.PrintString;
 import org.tomitribe.util.Size;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
@@ -63,18 +60,10 @@ public class ScenariosXmlTest {
         scenario.add(12, new CompositeFunction<>(new ResponseCode(500)));
 
         final PrintString xmlContent = new PrintString();
-        final JAXBContext jaxbContext = JAXBContext.newInstance(
-                Scenarios.class,
-                Scenarios.Xml.class,
-                CompositeFunction.class,
-                Outcome.class,
-                Bytes.class,
-                ResponseCode.class);
+        final ScenariosXml scenariosXml = new ScenariosXml();
 
         {
-            final Marshaller marshaller = jaxbContext.createMarshaller();
-            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-            marshaller.marshal(Scenarios.Xml.from(scenarios), xmlContent);
+            scenariosXml.marshal(scenarios, xmlContent);
 
             assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
                     "<scenarios>\n" +
@@ -107,9 +96,7 @@ public class ScenariosXmlTest {
         }
 
         { // from xml
-            final Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            final Scenarios.Xml unmarshal = (Scenarios.Xml) unmarshaller.unmarshal(IO.read(xmlContent.toString()));
-            final Scenarios<Response.ResponseBuilder> read = unmarshal.getScenarios();
+            final Scenarios<Response.ResponseBuilder> read = scenariosXml.unmarshal(xmlContent);
             final Collection<Scenario<Response.ResponseBuilder, Response.ResponseBuilder>> list = read.list();
             assertEquals(1, list.size());
 
@@ -117,12 +104,10 @@ public class ScenariosXmlTest {
             assertEquals(scenario, next);
 
             final PrintString secondContent = new PrintString();
-            final Marshaller marshaller = jaxbContext.createMarshaller();
-            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-            marshaller.marshal(Scenarios.Xml.from(read), secondContent);
+            scenariosXml.marshal(read, secondContent);
 
             assertEquals(xmlContent.toString(), secondContent.toString());
-            System.out.println(unmarshal);
         }
     }
+
 }

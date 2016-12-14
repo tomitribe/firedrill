@@ -18,6 +18,9 @@ package org.tomitribe.firedrill.rs;
 
 import org.apache.catalina.connector.Request;
 import org.tomitribe.firedrill.ScenarioExecutor;
+import org.tomitribe.firedrill.Scenarios;
+import org.tomitribe.firedrill.ScenariosXml;
+import org.tomitribe.util.PrintString;
 import org.tomitribe.util.collect.ObjectMap;
 
 import javax.enterprise.context.spi.CreationalContext;
@@ -28,10 +31,14 @@ import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -56,6 +63,24 @@ public class ResponseFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+
+        final HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
+        final HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
+
+        if (is(httpServletRequest, "GET", "/firedrill/scenarios")) {
+            downloadScenarios(httpServletRequest, httpServletResponse);
+            return;
+        }
+
+        if (is(httpServletRequest, "POST", "/firedrill/scenarios")) {
+            addScenarios(httpServletRequest, httpServletResponse);
+            return;
+        }
+
+        if (is(httpServletRequest, "PUT", "/firedrill/scenarios")) {
+            setScenarios(httpServletRequest, httpServletResponse);
+            return;
+        }
 
         final Map<String, String> context = new HashMap<>();
 
@@ -88,6 +113,11 @@ public class ResponseFilter implements Filter {
         filterChain.doFilter(servletRequest, servletResponse);
     }
 
+    public boolean is(HttpServletRequest httpServletRequest, final String method, final String s) {
+        final String s1 = httpServletRequest.getContextPath() + s;
+        return httpServletRequest.getRequestURI().equals(s1) && method.equalsIgnoreCase(httpServletRequest.getMethod());
+    }
+
     @Override
     public void destroy() {
     }
@@ -106,6 +136,46 @@ public class ResponseFilter implements Filter {
         final CreationalContext<?> creationalContext = beanManager.createCreationalContext(bean);
 
         return (T) beanManager.getReference(bean, type, creationalContext);
+    }
+
+    private void downloadScenarios(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try {
+            response.setContentType("application/xml");
+            final ServletOutputStream outputStream = response.getOutputStream();
+            final ScenariosXml scenariosXml = new ScenariosXml();
+            scenariosXml.marshal(scenarios.getScenarios(), outputStream);
+        } catch (JAXBException e) {
+            final PrintString printString = new PrintString();
+            e.printStackTrace(printString);
+            response.setContentType("text/plain");
+            response.getOutputStream().write(printString.toByteArray());
+        }
+    }
+
+    private void addScenarios(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try {
+            final ScenariosXml scenariosXml = new ScenariosXml();
+            final Scenarios<Response.ResponseBuilder> scenarios = scenariosXml.unmarshal(request.getInputStream());
+            this.scenarios.getScenarios().add(scenarios);
+        } catch (JAXBException e) {
+            final PrintString printString = new PrintString();
+            e.printStackTrace(printString);
+            response.setContentType("text/plain");
+            response.getOutputStream().write(printString.toByteArray());
+        }
+    }
+
+    private void setScenarios(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try {
+            final ScenariosXml scenariosXml = new ScenariosXml();
+            final Scenarios<Response.ResponseBuilder> scenarios = scenariosXml.unmarshal(request.getInputStream());
+            this.scenarios.getScenarios().set(scenarios);
+        } catch (JAXBException e) {
+            final PrintString printString = new PrintString();
+            e.printStackTrace(printString);
+            response.setContentType("text/plain");
+            response.getOutputStream().write(printString.toByteArray());
+        }
     }
 
 }
