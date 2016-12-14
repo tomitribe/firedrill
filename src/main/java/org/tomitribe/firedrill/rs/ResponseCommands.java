@@ -144,6 +144,86 @@ public class ResponseCommands implements CommandListener {
         }
     }
 
+    @Command("disk-fill")
+    public String diskfill(ScenarioId scenarioId,
+                           @Option("count") @Default("1") int count,
+                           @Option("min-bytes") Size minBytes,
+                           @Default("10mb") @Option("max-bytes") Size maxBytes) {
+
+        try {
+            final Scenario<Response.ResponseBuilder, Response.ResponseBuilder> scenario = scenarios.getScenarios().get(scenarioId);
+
+            Function<Response.ResponseBuilder, Response.ResponseBuilder> function = Function.identity();
+
+            if (minBytes != null || maxBytes != null) {
+                function = function.andThen(new DiskFill(minBytes, maxBytes));
+            }
+
+            scenario.add(count, function);
+
+            return print(scenario);
+        } catch (NoSuchElementException e) {
+            return "No such scenario " + scenarioId;
+        }
+    }
+
+    @Command("memory-fill")
+    public String memoryfill(ScenarioId scenarioId,
+                           @Option("count") @Default("1") int count,
+                           @Option("min-bytes") Size minBytes,
+                           @Default("10mb") @Option("max-bytes") Size maxBytes) {
+
+        try {
+            final Scenario<Response.ResponseBuilder, Response.ResponseBuilder> scenario = scenarios.getScenarios().get(scenarioId);
+
+            Function<Response.ResponseBuilder, Response.ResponseBuilder> function = Function.identity();
+
+            if (minBytes != null || maxBytes != null) {
+                function = function.andThen(new MemoryFill(minBytes, maxBytes));
+            }
+
+            scenario.add(count, function);
+
+            return print(scenario);
+        } catch (NoSuchElementException e) {
+            return "No such scenario " + scenarioId;
+        }
+    }
+
+    @Command("memory-clear")
+    public String memoryclear(ScenarioId scenarioId, @Option("count") @Default("1") int count) {
+
+        try {
+            final Scenario<Response.ResponseBuilder, Response.ResponseBuilder> scenario = scenarios.getScenarios().get(scenarioId);
+
+            Function<Response.ResponseBuilder, Response.ResponseBuilder> function = Function.identity();
+
+            function = function.andThen(new MemoryClear());
+            scenario.add(count, function);
+
+            return print(scenario);
+        } catch (NoSuchElementException e) {
+            return "No such scenario " + scenarioId;
+        }
+    }
+
+    @Command("disk-clear")
+    public String diskclear(ScenarioId scenarioId, @Option("count") @Default("1") int count) {
+
+        try {
+            final Scenario<Response.ResponseBuilder, Response.ResponseBuilder> scenario = scenarios.getScenarios().get(scenarioId);
+
+            Function<Response.ResponseBuilder, Response.ResponseBuilder> function = Function.identity();
+
+            function = function.andThen(new DiskClear());
+            scenario.add(count, function);
+
+            return print(scenario);
+        } catch (NoSuchElementException e) {
+            return "No such scenario " + scenarioId;
+        }
+    }
+
     private static String print(Scenario scenario) {
         final PrintString stream = new PrintString();
         print(stream, scenario);
