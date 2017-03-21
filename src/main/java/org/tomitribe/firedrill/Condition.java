@@ -140,122 +140,91 @@ public class Condition {
     }
 
     public Condition servicePath(Pattern servicePath) {
-        if (servicePath != null) patterns.put("servicePath", servicePath);
-        else patterns.remove("servicePath");
-        return this;
+        return update("servicePath", servicePath);
     }
 
     public Condition uri(Pattern uri) {
-        if (uri != null) patterns.put("uri", uri);
-        else patterns.remove("uri");
-        return this;
+        return update("uri", uri);
     }
 
     public Condition requestBytes(Pattern requestBytes) {
-        if (requestBytes != null) patterns.put("requestBytes", requestBytes);
-        else patterns.remove("requestBytes");
-        return this;
+        return update("requestBytes", requestBytes);
     }
 
     public Condition contentType(Pattern contentType) {
-        if (contentType != null) patterns.put("contentType", contentType);
-        else patterns.remove("contentType");
-        return this;
+        return update("contentType", contentType);
     }
 
     public Condition httpMethod(Pattern httpMethod) {
-        if (httpMethod != null) patterns.put("httpMethod", httpMethod);
-        else patterns.remove("httpMethod");
-        return this;
+        return update("httpMethod", httpMethod);
     }
 
     public Condition serviceName(Pattern serviceName) {
-        if (serviceName != null) patterns.put("serviceName", serviceName);
-        else patterns.remove("serviceName");
-        return this;
+        return update("serviceName", serviceName);
     }
 
     public Condition protocol(Pattern protocol) {
-        if (protocol != null) patterns.put("protocol", protocol);
-        else patterns.remove("protocol");
-        return this;
+        return update("protocol", protocol);
     }
 
     public Condition protocolVersion(Pattern protocolVersion) {
-        if (protocolVersion != null) patterns.put("protocolVersion", protocolVersion);
-        else patterns.remove("protocolVersion");
-        return this;
+        return update("protocolVersion", protocolVersion);
     }
 
     public Condition authResult(Pattern authResult) {
-        if (authResult != null) patterns.put("authResult", authResult);
-        else patterns.remove("authResult");
-        return this;
+        return update("authResult", authResult);
     }
 
     public Condition authErrorCode(Pattern authErrorCode) {
-        if (authErrorCode != null) patterns.put("authErrorCode", authErrorCode);
-        else patterns.remove("authErrorCode");
-        return this;
+        return update("authErrorCode", authErrorCode);
     }
 
     public Condition username(Pattern username) {
-        if (username != null) patterns.put("username", username);
-        else patterns.remove("username");
-        return this;
+        return update("username", username);
     }
 
     public Condition path(Pattern path) {
-        if (path != null) patterns.put("path", path);
-        else patterns.remove("path");
-        return this;
+        return update("path", path);
     }
 
     public Condition grantType(Pattern grantType) {
-        if (grantType != null) patterns.put("grantType", grantType);
-        else patterns.remove("grantType");
-        return this;
+        return update("grantType", grantType);
     }
 
     public Condition applicationName(Pattern applicationName) {
-        if (applicationName != null) patterns.put("applicationName", applicationName);
-        else patterns.remove("applicationName");
-        return this;
+        return update("applicationName", applicationName);
     }
 
     public Condition clientIp(Pattern clientIp) {
-        if (clientIp != null) patterns.put("clientIp", clientIp);
-        else patterns.remove("clientIp");
-        return this;
+        return update("clientIp", clientIp);
     }
 
     public Condition clientId(Pattern clientId) {
-        if (clientId != null) patterns.put("clientId", clientId);
-        else patterns.remove("clientId");
-        return this;
+        return update("clientId", clientId);
     }
 
     public Condition serverIp(Pattern serverIp) {
-        if (serverIp != null) patterns.put("serverIp", serverIp);
-        else patterns.remove("serverIp");
-        return this;
+        return update("serverIp", serverIp);
     }
 
     public Condition serverName(Pattern serverName) {
-        if (serverName != null) patterns.put("serverName", serverName);
-        else patterns.remove("serverName");
-        return this;
+        return update("serverName", serverName);
     }
 
     public Condition authType(Pattern authType) {
-        if (authType != null) patterns.put("authType", authType);
-        else patterns.remove("authType");
-        return this;
+        return update("authType", authType);
     }
 
     public Condition datacenter(Pattern datacenter) {
-        if (datacenter != null) patterns.put("datacenter", datacenter);
-        else patterns.remove("datacenter");
+        return update("datacenter", datacenter);
+    }
+
+    private Condition update(String key, Pattern pattern) {
+        if (pattern != null) {
+            patterns.put(key, pattern);
+        } else {
+            patterns.remove(key);
+        }
         return this;
     }
 

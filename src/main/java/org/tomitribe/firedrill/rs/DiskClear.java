@@ -16,24 +16,17 @@
  */
 package org.tomitribe.firedrill.rs;
 
-import org.tomitribe.crest.api.Option;
 import org.tomitribe.crest.api.Options;
 import org.tomitribe.util.IO;
-import org.tomitribe.util.Size;
 
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.File;
 import java.io.IOException;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
-
-import static org.tomitribe.util.SizeUnit.BYTES;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "disk-clear")
