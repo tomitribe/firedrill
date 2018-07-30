@@ -241,6 +241,29 @@ public class ResponseCommands implements CommandListener {
         }
     }
 
+    @Command("httpsession-danse")
+    public String httpSession(
+            ScenarioId scenarioId,
+            @Option("count") @Default("1") int count,
+            @Option("rate-per-sec") @Default("3") int ratePerSec,
+            @Option("invalidate-after-sec") @Default("60") int invalidateAfterSec) {
+
+        try {
+            final Scenario<Response.ResponseBuilder, Response.ResponseBuilder> scenario = scenarios.getScenarios().get(scenarioId);
+
+            Function<Response.ResponseBuilder, Response.ResponseBuilder> function = Function.identity();
+
+            function = function.andThen(new HttpSession(count, ratePerSec, invalidateAfterSec));
+            scenario.add(count, function);
+
+            return print(scenario);
+
+        } catch (NoSuchElementException e) {
+            return "No such scenario " + scenarioId;
+        }
+
+    }
+
     private static String print(Scenario scenario) {
         final PrintString stream = new PrintString();
         print(stream, scenario);
