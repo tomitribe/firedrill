@@ -51,6 +51,8 @@ import java.util.function.Function;
 @WebFilter("/*")
 public class ResponseFilter implements Filter {
 
+    public static final ThreadLocal<HttpServletRequest> REQUESTS = new ThreadLocal<>();
+
     @Inject
     private BeanManager beanManager;
 
@@ -106,11 +108,20 @@ public class ResponseFilter implements Filter {
         // This @RequestScoped bean helps us avoid a thread local
         final ResponseFunction reference = getReference(ResponseFunction.class, beanManager);
 
+        // This is not the most sexiest way to solve the issue but until we make sure that
+        // commands and functions are CDI beans and we can inject @RequestScoped beans, there is the hack
+        REQUESTS.set(httpServletRequest);
+
         // Ok, the code has a way to get our Function.  Let's hope they use it.
         reference.setFunction(function);
 
-        // Go forth and process
-        filterChain.doFilter(servletRequest, servletResponse);
+        try {
+            // Go forth and process
+            filterChain.doFilter(servletRequest, servletResponse);
+
+        } finally {
+            REQUESTS.remove();
+        }
     }
 
     public boolean is(HttpServletRequest httpServletRequest, final String method, final String s) {
